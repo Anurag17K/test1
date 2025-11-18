@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import boto3
 import os
@@ -43,8 +42,10 @@ def signup(request):
     if request.method == 'POST':
         username = request.POST['username'].strip()
         password = request.POST['password'].strip()
+
         resp = users_table.get_item(Key={'username': username})
         existing = resp.get('Item') if isinstance(resp, dict) else None
+
         if existing:
             messages.error(request, 'Username already taken.')
         else:
@@ -57,14 +58,17 @@ def signup(request):
             user_obj, _ = User.objects.get_or_create(username=username)
             messages.success(request, 'Account created. Please log in.')
             return redirect('login')
+
     return render(request, 'signup.html')
 
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username'].strip()
         password = request.POST['password'].strip()
+
         resp = users_table.get_item(Key={'username': username})
         user = resp.get('Item') if isinstance(resp, dict) else None
+
         if user and bcrypt.checkpw(password.encode(), user['password_hash'].encode()):
             request.session['username'] = username
             user_obj = User.objects.get(username=username)
@@ -72,6 +76,7 @@ def user_login(request):
             return redirect('dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
+
     return render(request, 'login.html')
 
 def user_logout(request):
@@ -79,6 +84,7 @@ def user_logout(request):
     if username:
         user_obj = User.objects.get(username=username)
         log_action_sqlite(user_obj, 'logout')
+
     request.session.flush()
     return redirect('login')
 
@@ -89,16 +95,21 @@ def dashboard(request):
     triggered = False
     notification_sent = False
 
-    # FIXED — always initialize health to avoid .get() crash
-    health = {"score": None, "color": None}
-
     username = request.session.get('username')
     user_obj = User.objects.get(username=username)
 
     if request.method == 'POST':
-        action = request.POST.get('action', '').strip()
-        item_id = request.POST.get('item_id', '').strip()
-        item_name = request.POST.get('item_name', '').strip()
+
+        # ------------------------------------------
+        # FIX: Remove unwanted hidden “health” field
+        # ------------------------------------------
+        post_data = request.POST.copy()
+        if "health" in post_data:
+            del post_data["health"]
+
+        action = post_data.get('action', '').strip()
+        item_id = post_data.get('item_id', '').strip()
+        item_name = post_data.get('item_name', '').strip()
 
         # ---------- Quick Stock Check ----------
         if action == 'check_stock':
@@ -107,11 +118,13 @@ def dashboard(request):
             if item_id:
                 resp = inventory_table.get_item(Key={'item_id': item_id})
                 item = resp.get('Item') if isinstance(resp, dict) else None
+
                 if isinstance(item, dict):
                     quantity = int(item.get('quantity', 0))
                     threshold = int(item.get('threshold', 10))
                     item_name = item.get('name', item_name)
 
+                    # expiry
                     expiry_str = item.get('expiry_date')
                     if expiry_str:
                         try:
@@ -136,8 +149,9 @@ def dashboard(request):
 
             log_action_sqlite(user_obj, 'check_stock', item_id)
 
-        # ---------- Detailed Inventory Check ----------
+        # ---------- Detailed Inventory Analysis ----------
         elif action == 'check_inventory':
+
             if not item_id:
                 result['error'] = "Item ID is required."
                 return render(request, 'dashboard.html', {'result': result})
@@ -158,6 +172,7 @@ def dashboard(request):
 
             expiry_days = None
             expiry_str = item.get('expiry_date')
+
             if expiry_str:
                 try:
                     expiry_dt = datetime.strptime(expiry_str, '%Y-%m-%d').date()
@@ -213,9 +228,10 @@ def item_create(request):
         max_capacity = int(request.POST.get('max_capacity', 0))
         monthly_sales = int(request.POST.get('monthly_sales', 0))
         next_shipment_days = int(request.POST.get('next_shipment_days', 0))
-        expiry_date_str = request.POST.get('expiry_date', '').strip()
 
+        expiry_date_str = request.POST.get('expiry_date', '').strip()
         expiry_days = None
+
         if expiry_date_str:
             try:
                 expiry_dt = datetime.strptime(expiry_date_str, '%Y-%m-%d').date()
@@ -276,9 +292,10 @@ def item_update(request, pk):
         max_capacity = int(request.POST.get('max_capacity', 0))
         monthly_sales = int(request.POST.get('monthly_sales', 0))
         next_shipment_days = int(request.POST.get('next_shipment_days', 0))
-        expiry_date_str = request.POST.get('expiry_date', '').strip()
 
+        expiry_date_str = request.POST.get('expiry_date', '').strip()
         expiry_days = None
+
         if expiry_date_str:
             try:
                 expiry_dt = datetime.strptime(expiry_date_str, '%Y-%m-%d').date()
@@ -311,8 +328,10 @@ def item_update(request, pk):
 
         inventory_table.put_item(Item=updated)
         messages.success(request, f"Item {pk} updated.")
+
         user_obj = User.objects.get(username=request.session.get('username'))
         log_action_sqlite(user_obj, 'update_item', pk)
+
         return redirect('item_list')
 
     return render(request, 'item_form.html', {'item': item})
@@ -321,7 +340,9 @@ def item_update(request, pk):
 def item_delete(request, pk):
     pk = str(pk)
     inventory_table.delete_item(Key={'item_id': pk})
+
     messages.success(request, f"Item {pk} deleted.")
     user_obj = User.objects.get(username=request.session.get('username'))
     log_action_sqlite(user_obj, 'delete_item', pk)
+
     return redirect('item_list')
