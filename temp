@@ -1,12 +1,27 @@
-# Install system packages required for compiling mysqlclient
 packages:
   yum:
-    gcc: []                     # C compiler
-    gcc-c++: []                 # C++ compiler (sometimes needed)
-    python3-devel: []           # Python headers (Python.h)
-    mariadb-connector-c-devel: []  # MySQL/MariaDB client libraries
+    gcc: []
+    python3-devel: []
+    mariadb-connector-c-devel: []
 
-# Optional commands
 commands:
-  01_upgrade_pip:
-    command: pip install --upgrade pip
+  01_create_virtualenv:
+    command: |
+      # Create a virtual environment if not already created
+      if [ ! -d "/var/app/venv/staging-LQM1lest" ]; then
+        python3 -m venv /var/app/venv/staging-LQM1lest
+      fi
+
+  02_activate_virtualenv:
+    command: |
+      source /var/app/venv/staging-LQM1lest/bin/activate
+
+  03_upgrade_pip:
+    command: |
+      source /var/app/venv/staging-LQM1lest/bin/activate
+      pip install --upgrade pip
+
+  04_install_mysqlclient:
+    command: |
+      source /var/app/venv/staging-LQM1lest/bin/activate
+      pip install mysqlclient
