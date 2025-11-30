@@ -1,0 +1,60 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="cloud-arch" name="Cloud Architecture">
+    <mxGraphModel dx="827" dy="504" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Users -->
+        <mxCell id="2" value="Users" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="120" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Load Balancer -->
+        <mxCell id="3" value="Load Balancer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="90" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- EB -->
+        <mxCell id="4" value="Elastic Beanstalk (Django)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="260" y="170" width="230" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- RDS -->
+        <mxCell id="5" value="RDS MySQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="260" width="150" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- SQS -->
+        <mxCell id="6" value="SQS Queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="350" y="260" width="130" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Lambda -->
+        <mxCell id="7" value="Lambda Function" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="350" y="340" width="140" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- SNS -->
+        <mxCell id="8" value="SNS Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#4d79ff;" vertex="1" parent="1">
+          <mxGeometry x="350" y="420" width="160" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Tips API -->
+        <mxCell id="9" value="Tips API (API GW + Lambda)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="550" y="170" width="200" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="10" edge="1" source="2" target="3" style="endArrow=classic;strokeWidth=2;" parent="1"/>
+        <mxCell id="11" edge="1" source="3" target="4" style="endArrow=classic;strokeWidth=2;" parent="1"/>
+        <mxCell id="12" edge="1" source="4" target="5" style="endArrow=classic;strokeWidth=2;" parent="1"/>
+        <mxCell id="13" edge="1" source="4" target="6" style="endArrow=classic;strokeWidth=2;" parent="1"/>
+        <mxCell id="14" edge="1" source="6" target="7" style="endArrow=classic;strokeWidth=2;" parent="1"/>
+        <mxCell id="15" edge="1" source="7" target="8" style="endArrow=classic;strokeWidth=2;" parent="1"/>
+        <mxCell id="16" edge="1" source="4" target="9" style="endArrow=classic;strokeWidth=2;dashed=1;" parent="1"/>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
