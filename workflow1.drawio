@@ -1,34 +1,34 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0" version="29.2.1">
   <diagram name="Page-1" id="vl9X8wamqGWSmH4vftbm">
-    <mxGraphModel dx="1149" dy="633" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="940" dy="518" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="light-dark(#FFFFFF,#D5E8D4)" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="NDhre6na7VAQVBieo38s-17" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NDhre6na7VAQVBieo38s-13" value="">
+        <mxCell id="NDhre6na7VAQVBieo38s-17" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=light-dark(#000000,#000000);" target="NDhre6na7VAQVBieo38s-13" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-1" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.cloud9;" value="" vertex="1">
+        <mxCell id="NDhre6na7VAQVBieo38s-1" parent="1" style="sketch=0;outlineConnect=0;fontColor=#000000;fillColor=#fa6800;strokeColor=#C73500;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.cloud9;" value="" vertex="1">
           <mxGeometry height="42.63" width="66.5" x="375" y="80" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-11" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=0;fontColor=#1F2328;" value="GitHub Actions" vertex="1">
+        <mxCell id="NDhre6na7VAQVBieo38s-11" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=0;fontColor=#1F2328;" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;GitHub Actions&lt;/font&gt;" vertex="1">
           <mxGeometry height="2.5" width="136" x="342" y="300" as="geometry" />
         </mxCell>
         <mxCell id="NDhre6na7VAQVBieo38s-12" parent="1" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.automation;pointerEvents=1;" value="" vertex="1">
           <mxGeometry height="45" width="50" x="383.25" y="250" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-16" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NDhre6na7VAQVBieo38s-12" value="">
+        <mxCell id="NDhre6na7VAQVBieo38s-16" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);" target="NDhre6na7VAQVBieo38s-12" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-21" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NDhre6na7VAQVBieo38s-20" value="">
+        <mxCell id="NDhre6na7VAQVBieo38s-21" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=light-dark(#000000,#000000);" target="NDhre6na7VAQVBieo38s-20" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
+        <mxCell id="NDhre6na7VAQVBieo38s-18" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontColor=light-dark(#FFFFFF,#D5E8D4);fillColor=none;strokeColor=light-dark(#000000,#000000);" value="" vertex="1">
           <mxGeometry height="80" width="172" x="322.25" y="310" as="geometry" />
         </mxCell>
         <mxCell id="NDhre6na7VAQVBieo38s-13" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/icon-cache1/Miu_Black_Social-2261/github-1223.svg" value="" vertex="1">
           <mxGeometry height="60" width="60" x="378.25" y="160" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-19" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="setting up Python&lt;div&gt;Install Dependencies&lt;/div&gt;&lt;div&gt;zip application&lt;/div&gt;&lt;div&gt;Deploying Beanstalk&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="NDhre6na7VAQVBieo38s-19" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;setting up Python&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;Install Dependencies&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;zip application&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 0, 0));&quot;&gt;Deploying Beanstalk&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="30" width="130" x="340" y="340" as="geometry" />
         </mxCell>
         <mxCell id="NDhre6na7VAQVBieo38s-20" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#ffffff;fillColor=#232F3E;dashed=0;verticalLabelPosition=middle;verticalAlign=bottom;align=center;html=1;whiteSpace=wrap;fontSize=10;fontStyle=1;spacing=3;shape=mxgraph.aws4.productIcon;prIcon=mxgraph.aws4.elastic_beanstalk;" value="AWS Elastic Beanstalk" vertex="1">
@@ -37,10 +37,10 @@
         <mxCell id="NDhre6na7VAQVBieo38s-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;align=left;" value="" vertex="1">
           <mxGeometry height="60" width="180" x="320" y="540" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-31" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NDhre6na7VAQVBieo38s-24" value="">
+        <mxCell id="NDhre6na7VAQVBieo38s-31" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);" target="NDhre6na7VAQVBieo38s-24" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: left;&quot;&gt;- Deploys new version&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Reads environment variables&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;- Launches Django application&lt;/span&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="NDhre6na7VAQVBieo38s-23" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);" value="&lt;div style=&quot;text-align: left;&quot;&gt;- Deploys new version&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;- Reads environment variables&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;- Launches Django application&lt;/span&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="70" width="190" x="313.25" y="530" as="geometry" />
         </mxCell>
         <mxCell id="NDhre6na7VAQVBieo38s-24" parent="1" style="points=[];aspect=fixed;html=1;align=center;shadow=0;dashed=0;fillColor=#FF6A00;strokeColor=none;shape=mxgraph.alibaba_cloud.domain_and_website;" value="" vertex="1">
@@ -49,13 +49,13 @@
         <mxCell id="NDhre6na7VAQVBieo38s-26" parent="1" style="whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
           <mxGeometry height="70" width="140" x="338" y="720" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div&gt;- Serves web requests&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;- Handles facility ops&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- Auth + media uploads&lt;/div&gt;" vertex="1">
-          <mxGeometry height="140" width="142" x="337" y="680" as="geometry" />
+        <mxCell id="NDhre6na7VAQVBieo38s-25" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="&lt;div&gt;- Serves web requests&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;- Handles facility ops&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- Auth + media uploads&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="142" x="337.25" y="668.6" as="geometry" />
         </mxCell>
-        <mxCell id="WUhlhkbjrlZ9SetwWyoV-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Cloud9" vertex="1">
-          <mxGeometry height="30" width="60" x="378" y="60" as="geometry" />
+        <mxCell id="WUhlhkbjrlZ9SetwWyoV-1" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="Cloud9" vertex="1">
+          <mxGeometry height="30" width="60" x="430" y="86.32" as="geometry" />
         </mxCell>
-        <mxCell id="WUhlhkbjrlZ9SetwWyoV-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Github Repo" vertex="1">
+        <mxCell id="WUhlhkbjrlZ9SetwWyoV-2" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="Github Repo" vertex="1">
           <mxGeometry height="30" width="60" x="430" y="175" as="geometry" />
         </mxCell>
         <mxCell id="WUhlhkbjrlZ9SetwWyoV-4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="." vertex="1">
