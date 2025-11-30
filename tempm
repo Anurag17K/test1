@@ -1,0 +1,182 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.utils import timezone
+
+
+# -------------------------
+# CUSTOM USER
+# -------------------------
+class User(AbstractUser):
+    is_landlord = models.BooleanField(default=False)
+    is_tenant = models.BooleanField(default=False)
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+
+    def __str__(self):
+        role = "Landlord" if self.is_landlord else "Tenant" if self.is_tenant else "User"
+        return f"{self.username} ({role})"
+
+
+# -------------------------
+# PROPERTY
+# -------------------------
+class Property(models.Model):
+    landlord = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="properties"
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    available_from = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.city}"
+
+
+class PropertyImage(models.Model):
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE,
+        related_name="images"
+    )
+    image = models.ImageField(upload_to="property_images/")
+    caption = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"Image for {self.property.title}"
+
+
+# -------------------------
+# TENANCY APPLICATION
+# -------------------------
+APPLICATION_STATUS_CHOICES = [
+    ("pending", "Pending"),
+    ("approved", "Approved"),
+    ("rejected", "Rejected"),
+]
+
+
+class TenancyApplication(models.Model):
+    tenant = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="applications"
+    )
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE,
+        related_name="applications"
+    )
+    message = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20, choices=APPLICATION_STATUS_CHOICES,
+        default="pending"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]   # FIX: allow multiple applications!
+
+    def __str__(self):
+        return f"{self.tenant.username} -> {self.property.title} ({self.status})"
+
+
+# -------------------------
+# TENANCY
+# -------------------------
+class Tenancy(models.Model):
+    tenant = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="tenancies"
+    )
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE,
+        related_name="tenancies"
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("tenant", "property", "start_date")
+
+    def __str__(self):
+        return f"Tenancy: {self.tenant.username} - {self.property.title}"
+
+    def check_and_expire(self):
+        if self.active and timezone.now().date() > self.end_date:
+            self.active = False
+            self.save()
+
+
+# -------------------------
+# PAYMENT
+# -------------------------
+class Payment(models.Model):
+    tenancy = models.ForeignKey(
+        Tenancy, on_delete=models.CASCADE,
+        related_name="payments"
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+    note = models.CharField(max_length=255, blank=True)
+    paid_by_tenant = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Payment {self.amount} for {self.tenancy}"
+
+
+# -------------------------
+# NOTIFICATION
+# -------------------------
+class Notification(models.Model):
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="sent_notifications"
+    )
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="notifications"
+    )
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Notification to {self.recipient.username}: {self.subject}"
+
+
+# -------------------------
+# MAINTENANCE TICKET
+# -------------------------
+TICKET_STATUS_CHOICES = [
+    ("open", "Open"),
+    ("in_progress", "In Progress"),
+    ("resolved", "Resolved"),
+    ("closed", "Closed"),
+]
+
+
+class MaintenanceTicket(models.Model):
+    tenancy = models.ForeignKey(
+        Tenancy, on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    status = models.CharField(
+        max_length=20, choices=TICKET_STATUS_CHOICES,
+        default="open"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Ticket: {self.title} ({self.status})"
