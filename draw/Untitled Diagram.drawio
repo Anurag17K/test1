@@ -58,6 +58,10 @@
         </mxCell>
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-17" edge="1" parent="1" source="9e4kkIDtSIb9kZRDZaxI-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;strokeColor=light-dark(#000000,#000000);" target="9e4kkIDtSIb9kZRDZaxI-11">
           <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="283" y="340" />
+              <mxPoint x="460" y="340" />
+            </Array>
             <mxPoint x="280" y="350" as="targetPoint" />
           </mxGeometry>
         </mxCell>
@@ -112,12 +116,8 @@
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-36" parent="1" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.virtual_private_cloud;fillColor=#F58534;gradientColor=none;" value="" vertex="1">
           <mxGeometry height="30" width="39.5" x="710" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="9e4kkIDtSIb9kZRDZaxI-42" edge="1" parent="1" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;rounded=0;" value="">
-          <mxGeometry relative="1" width="80" as="geometry">
-            <Array as="points" />
-            <mxPoint x="430" y="260" as="sourcePoint" />
-            <mxPoint x="510" y="260" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="9e4kkIDtSIb9kZRDZaxI-43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="Application" vertex="1">
+          <mxGeometry height="30" width="60" x="252.5" y="160" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
