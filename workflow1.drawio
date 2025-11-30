@@ -37,6 +37,9 @@
         <mxCell id="NDhre6na7VAQVBieo38s-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;align=left;" value="" vertex="1">
           <mxGeometry height="60" width="180" x="320" y="540" as="geometry" />
         </mxCell>
+        <mxCell id="NDhre6na7VAQVBieo38s-25" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="&lt;div&gt;- Serves web requests&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;- Handles facility ops&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- Auth + media uploads&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="142" x="340" y="668.6" as="geometry" />
+        </mxCell>
         <mxCell id="NDhre6na7VAQVBieo38s-31" edge="1" parent="1" source="NDhre6na7VAQVBieo38s-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontColor=light-dark(#000000,#000000);strokeColor=light-dark(#000000,#000000);" target="NDhre6na7VAQVBieo38s-24" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -46,11 +49,8 @@
         <mxCell id="NDhre6na7VAQVBieo38s-24" parent="1" style="points=[];aspect=fixed;html=1;align=center;shadow=0;dashed=0;fillColor=#FF6A00;strokeColor=none;shape=mxgraph.alibaba_cloud.domain_and_website;" value="" vertex="1">
           <mxGeometry height="41.4" width="51.3" x="382.6" y="668.6" as="geometry" />
         </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-26" parent="1" style="whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
-          <mxGeometry height="70" width="140" x="338" y="720" as="geometry" />
-        </mxCell>
-        <mxCell id="NDhre6na7VAQVBieo38s-25" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="&lt;div&gt;- Serves web requests&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;- Handles facility ops&lt;/span&gt;&lt;/div&gt;&lt;div&gt;- Auth + media uploads&lt;/div&gt;" vertex="1">
-          <mxGeometry height="140" width="142" x="337.25" y="668.6" as="geometry" />
+        <mxCell id="NDhre6na7VAQVBieo38s-26" parent="1" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=light-dark(#000000,#000000);" value="" vertex="1">
+          <mxGeometry height="70" width="140" x="338.25" y="710" as="geometry" />
         </mxCell>
         <mxCell id="WUhlhkbjrlZ9SetwWyoV-1" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="Cloud9" vertex="1">
           <mxGeometry height="30" width="60" x="430" y="86.32" as="geometry" />
