@@ -1,182 +1,454 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login, logout, messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.utils import timezone
+from datetime import date, timedelta
+import boto3
+import json
+import os
+
+from .models import User, Property, TenancyApplication, Tenancy, Payment, Notification
+from .forms import (
+    UserRegisterForm, LoginForm, PropertyForm, PropertyImageFormSet,
+    ApplicationForm, TenancyForm, PaymentForm, NotificationForm,
+    MaintenanceTicketForm, TenantRegisterForm, LandlordRegisterForm
+)
+
+AWS_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:941052463179:rms-notifications"
+AWS_S3_REGION_NAME = "us-east-1"
 
 
-# -------------------------
-# CUSTOM USER
-# -------------------------
-class User(AbstractUser):
-    is_landlord = models.BooleanField(default=False)
-    is_tenant = models.BooleanField(default=False)
-    phone = models.CharField(max_length=20, blank=True)
-    address = models.TextField(blank=True)
-
-    def __str__(self):
-        role = "Landlord" if self.is_landlord else "Tenant" if self.is_tenant else "User"
-        return f"{self.username} ({role})"
+# ----------------------------------
+# HOME
+# ----------------------------------
+def home(request):
+    properties = Property.objects.all().order_by('-created_at')[:9]
+    return render(request, 'rentals/home.html', {'properties': properties})
 
 
-# -------------------------
-# PROPERTY
-# -------------------------
-class Property(models.Model):
-    landlord = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name="properties"
-    )
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    address = models.CharField(max_length=255)
-    city = models.CharField(max_length=100)
-    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    available_from = models.DateField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.title} - {self.city}"
-
-
-class PropertyImage(models.Model):
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE,
-        related_name="images"
-    )
-    image = models.ImageField(upload_to="property_images/")
-    caption = models.CharField(max_length=200, blank=True)
-
-    def __str__(self):
-        return f"Image for {self.property.title}"
+# ----------------------------------
+# AUTH VIEWS
+# ----------------------------------
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Registration successful.')
+            if user.is_landlord:
+                return redirect('landlord_dashboard')
+            elif user.is_tenant:
+                return redirect('tenant_dashboard')
+            return redirect('home')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'rentals/register.html', {'form': form})
 
 
-# -------------------------
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, 'Logged in successfully.')
+            if user.is_landlord:
+                return redirect('landlord_dashboard')
+            elif user.is_tenant:
+                return redirect('tenant_dashboard')
+            return redirect('home')
+    else:
+        form = LoginForm()
+    return render(request, 'rentals/login.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    messages.info(request, 'You have been logged out.')
+    return redirect('home')
+
+
+# ----------------------------------
+# PROPERTY VIEWS
+# ----------------------------------
+def property_list(request):
+    properties = Property.objects.select_related('landlord').order_by('-created_at')
+    return render(request, 'rentals/property_list.html', {'properties': properties})
+
+
+def property_detail(request, pk):
+    prop = get_object_or_404(Property.objects.select_related('landlord'), pk=pk)
+    app_form = None
+    if request.user.is_authenticated and request.user.is_tenant:
+        app_form = ApplicationForm()
+
+    return render(request, 'rentals/property_detail.html', {
+        'property': prop,
+        'app_form': app_form,
+    })
+
+
+@login_required
+def landlord_dashboard(request):
+    if not request.user.is_landlord:
+        raise PermissionDenied("Only landlords can access this page.")
+
+    properties = request.user.properties.all().order_by('-created_at')
+
+    applications = TenancyApplication.objects.filter(
+        property__landlord=request.user,
+        status='pending'
+    ).select_related('tenant', 'property').order_by('-created_at')
+
+    notifications = Notification.objects.filter(
+        recipient=request.user
+    ).order_by('-created_at')[:10]
+
+    return render(request, 'rentals/landlord_dashboard.html', {
+        'properties': properties,
+        'applications': applications,
+        'notifications': notifications
+    })
+
+
+# ----------------------------------
+# PROPERTY CREATE/UPDATE/DELETE
+# ----------------------------------
+@login_required
+def property_create(request):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = PropertyForm(request.POST)
+        formset = PropertyImageFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                prop = form.save(commit=False)
+                prop.landlord = request.user
+                prop.save()
+                formset.instance = prop
+                formset.save()
+            messages.success(request, 'Property created successfully.')
+            return redirect('landlord_dashboard')
+    else:
+        form = PropertyForm()
+        formset = PropertyImageFormSet()
+
+    return render(request, 'rentals/property_form.html', {
+        'form': form,
+        'formset': formset,
+        'create': True
+    })
+
+
+@login_required
+def property_update(request, pk):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+    prop = get_object_or_404(Property, pk=pk, landlord=request.user)
+
+    if request.method == 'POST':
+        form = PropertyForm(request.POST, instance=prop)
+        formset = PropertyImageFormSet(request.POST, request.FILES, instance=prop)
+        if form.is_valid() and formset.is_valid():
+            with transaction.atomic():
+                form.save()
+                formset.save()
+            messages.success(request, 'Property updated successfully.')
+            return redirect('landlord_dashboard')
+    else:
+        form = PropertyForm(instance=prop)
+        formset = PropertyImageFormSet(instance=prop)
+
+    return render(request, 'rentals/property_form.html', {
+        'form': form,
+        'formset': formset,
+        'create': False
+    })
+
+
+@login_required
+def property_delete(request, pk):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+    prop = get_object_or_404(Property, pk=pk, landlord=request.user)
+    prop.delete()
+    messages.info(request, 'Property deleted.')
+    return redirect('landlord_dashboard')
+
+
+# ----------------------------------
 # TENANCY APPLICATION
-# -------------------------
-APPLICATION_STATUS_CHOICES = [
-    ("pending", "Pending"),
-    ("approved", "Approved"),
-    ("rejected", "Rejected"),
-]
+# ----------------------------------
+@login_required
+def apply_property(request, property_id):
+    if not request.user.is_tenant:
+        raise PermissionDenied
+
+    prop = get_object_or_404(Property, pk=property_id)
+
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST)
+        if form.is_valid():
+
+            # Always create new application
+            application = TenancyApplication.objects.create(
+                tenant=request.user,
+                property=prop,
+                message=form.cleaned_data['message'],
+                status='pending'
+            )
+
+            # INTERNAL notification for landlord
+            Notification.objects.create(
+                sender=request.user,
+                recipient=prop.landlord,
+                message=f"{request.user.username} submitted a rental application for {prop.title}."
+            )
+
+            messages.success(request, 'Application submitted.')
+    return redirect('property_detail', pk=property_id)
 
 
-class TenancyApplication(models.Model):
-    tenant = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name="applications"
+@login_required
+def application_list(request):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+
+    applications = TenancyApplication.objects.filter(
+        property__landlord=request.user
+    ).select_related('tenant', 'property').order_by('-created_at')
+
+    return render(request, 'rentals/application_list.html', {'applications': applications})
+
+
+@login_required
+def application_approve(request, pk):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+
+    application = get_object_or_404(
+        TenancyApplication,
+        pk=pk,
+        property__landlord=request.user
     )
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE,
-        related_name="applications"
+
+    application.status = 'approved'
+    application.save()
+
+    # Create tenancy automatically
+    Tenancy.objects.get_or_create(
+        tenant=application.tenant,
+        property=application.property,
+        start_date=date.today(),
+        end_date=date.today() + timedelta(days=365),
+        defaults={'active': True}
     )
-    message = models.TextField(blank=True)
-    status = models.CharField(
-        max_length=20, choices=APPLICATION_STATUS_CHOICES,
-        default="pending"
+
+    messages.success(request, 'Application approved and tenancy created.')
+    return redirect('application_list')
+
+
+@login_required
+def application_reject(request, pk):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+
+    application = get_object_or_404(
+        TenancyApplication,
+        pk=pk,
+        property__landlord=request.user
     )
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ["-created_at"]   # FIX: allow multiple applications!
+    application.status = 'rejected'
+    application.save()
 
-    def __str__(self):
-        return f"{self.tenant.username} -> {self.property.title} ({self.status})"
-
-
-# -------------------------
-# TENANCY
-# -------------------------
-class Tenancy(models.Model):
-    tenant = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name="tenancies"
-    )
-    property = models.ForeignKey(
-        Property, on_delete=models.CASCADE,
-        related_name="tenancies"
-    )
-    start_date = models.DateField()
-    end_date = models.DateField()
-    active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("tenant", "property", "start_date")
-
-    def __str__(self):
-        return f"Tenancy: {self.tenant.username} - {self.property.title}"
-
-    def check_and_expire(self):
-        if self.active and timezone.now().date() > self.end_date:
-            self.active = False
-            self.save()
+    messages.info(request, 'Application rejected.')
+    return redirect('application_list')
 
 
-# -------------------------
-# PAYMENT
-# -------------------------
-class Payment(models.Model):
-    tenancy = models.ForeignKey(
-        Tenancy, on_delete=models.CASCADE,
-        related_name="payments"
-    )
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
-    note = models.CharField(max_length=255, blank=True)
-    paid_by_tenant = models.BooleanField(default=True)
+# ----------------------------------
+# PAYMENTS
+# ----------------------------------
+@login_required
+def payments_view(request, tenancy_id):
+    tenancy = get_object_or_404(Tenancy, pk=tenancy_id)
+    if request.user != tenancy.tenant and request.user != tenancy.property.landlord:
+        raise PermissionDenied
 
-    def __str__(self):
-        return f"Payment {self.amount} for {self.tenancy}"
+    payments = tenancy.payments.order_by('-date')
+    return render(request, 'rentals/payments.html', {'tenancy': tenancy, 'payments': payments})
 
 
-# -------------------------
-# NOTIFICATION
-# -------------------------
-class Notification(models.Model):
-    sender = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name="sent_notifications"
-    )
-    recipient = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name="notifications"
-    )
-    subject = models.CharField(max_length=200)
-    message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    read = models.BooleanField(default=False)
+@login_required
+def payment_create(request, tenancy_id):
+    tenancy = get_object_or_404(Tenancy, pk=tenancy_id)
 
-    class Meta:
-        ordering = ["-created_at"]
+    if not request.user.is_tenant or request.user != tenancy.tenant:
+        raise PermissionDenied
 
-    def __str__(self):
-        return f"Notification to {self.recipient.username}: {self.subject}"
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.tenancy = tenancy
+            payment.paid_by_tenant = True
+            payment.save()
 
+            messages.success(request, 'Payment recorded.')
+            return redirect('payments', tenancy_id=tenancy.id)
+    else:
+        form = PaymentForm()
 
-# -------------------------
-# MAINTENANCE TICKET
-# -------------------------
-TICKET_STATUS_CHOICES = [
-    ("open", "Open"),
-    ("in_progress", "In Progress"),
-    ("resolved", "Resolved"),
-    ("closed", "Closed"),
-]
+    return render(request, 'rentals/payment_form.html', {'form': form, 'tenancy': tenancy})
 
 
-class MaintenanceTicket(models.Model):
-    tenancy = models.ForeignKey(
-        Tenancy, on_delete=models.CASCADE,
-        related_name="tickets"
-    )
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    status = models.CharField(
-        max_length=20, choices=TICKET_STATUS_CHOICES,
-        default="open"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# ----------------------------------
+# MAINTENANCE TICKETS
+# ----------------------------------
+@login_required
+def tickets_view(request):
+    if not request.user.is_tenant and not request.user.is_landlord:
+        raise PermissionDenied
 
-    def __str__(self):
-        return f"Ticket: {self.title} ({self.status})"
+    if request.user.is_tenant:
+        tenancies = request.user.tenancies.all()
+    else:
+        tenancies = Tenancy.objects.filter(property__landlord=request.user)
+
+    tickets = []
+    for t in tenancies:
+        tickets.extend(list(t.tickets.all()))
+
+    tickets = sorted(tickets, key=lambda x: x.created_at, reverse=True)
+
+    return render(request, 'rentals/tickets.html', {'tickets': tickets})
+
+
+@login_required
+def ticket_create(request, tenancy_id):
+    tenancy = get_object_or_404(Tenancy, pk=tenancy_id)
+
+    if not request.user.is_tenant or tenancy.tenant != request.user:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = MaintenanceTicketForm(request.POST)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.tenancy = tenancy
+            ticket.save()
+
+            messages.success(request, 'Maintenance ticket created.')
+            return redirect('tickets')
+    else:
+        form = MaintenanceTicketForm()
+
+    return render(request, 'rentals/ticket_form.html', {'form': form, 'tenancy': tenancy})
+
+
+# ----------------------------------
+# USER REGISTRATION (LANDLORD / TENANT)
+# ----------------------------------
+def landlord_register_view(request):
+    if request.method == 'POST':
+        form = LandlordRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Landlord account created.')
+            return redirect('landlord_dashboard')
+    else:
+        form = LandlordRegisterForm()
+    return render(request, 'rentals/landlord_register.html', {'form': form})
+
+
+def tenant_register_view(request):
+    if request.method == 'POST':
+        form = TenantRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Tenant account created.')
+            return redirect('tenant_dashboard')
+    else:
+        form = TenantRegisterForm()
+    return render(request, 'rentals/tenant_register.html', {'form': form})
+
+
+# ----------------------------------
+# NOTIFICATIONS
+# ----------------------------------
+@login_required
+def notifications_view(request):
+    sent = Notification.objects.filter(sender=request.user).order_by('-created_at')
+    received = Notification.objects.filter(recipient=request.user).order_by('-created_at')
+
+    return render(request, 'rentals/notifications.html', {
+        'sent': sent,
+        'received': received
+    })
+
+
+@login_required
+def notification_create(request):
+    if not request.user.is_landlord:
+        raise PermissionDenied
+
+    form = NotificationForm()
+    form.fields['recipient'].queryset = User.objects.filter(is_tenant=True)
+
+    if request.method == 'POST':
+        form = NotificationForm(request.POST)
+        form.fields['recipient'].queryset = User.objects.filter(is_tenant=True)
+
+        if form.is_valid():
+            notif = form.save(commit=False)
+            notif.sender = request.user
+            notif.save()
+
+            # Try AWS SNS publish
+            try:
+                sns_client = boto3.client('sns', region_name=AWS_S3_REGION_NAME)
+                message = json.dumps({
+                    "sender": request.user.username,
+                    "recipient": notif.recipient.username,
+                    "body": notif.message
+                })
+                sns_client.publish(
+                    TopicArn=AWS_SNS_TOPIC_ARN,
+                    Message=message,
+                    Subject="RentalSys Notification"
+                )
+            except Exception as e:
+                messages.warning(request, f'Notification saved but SNS publish failed: {e}')
+
+            messages.success(request, 'Notification sent.')
+            return redirect('notifications')
+
+    return render(request, 'rentals/notification_form.html', {'form': form})
+
+
+# ----------------------------------
+# TENANT DASHBOARD
+# ----------------------------------
+@login_required
+def tenant_dashboard(request):
+    if not request.user.is_tenant:
+        raise PermissionDenied
+
+    # Auto-expire ended tenancies
+    for t in request.user.tenancies.all():
+        t.check_and_expire()
+
+    tenancies = request.user.tenancies.select_related('property').order_by('-created_at')
+    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')[:10]
+
+    return render(request, 'rentals/tenant_dashboard.html', {
+        'tenancies': tenancies,
+        'notifications': notifications
+    })
