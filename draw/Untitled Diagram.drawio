@@ -4,6 +4,9 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="9e4kkIDtSIb9kZRDZaxI-33" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 4;fillColor=none;strokeColor=light-dark(#B46504,#FFFF66);" value="" vertex="1">
+          <mxGeometry height="380" width="570" x="190" y="60" as="geometry" />
+        </mxCell>
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-14" edge="1" parent="1" source="9e4kkIDtSIb9kZRDZaxI-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="9e4kkIDtSIb9kZRDZaxI-12" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -51,7 +54,7 @@
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-20" edge="1" parent="1" source="9e4kkIDtSIb9kZRDZaxI-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="9e4kkIDtSIb9kZRDZaxI-7" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="9e4kkIDtSIb9kZRDZaxI-13" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;" value="" vertex="1">
+        <mxCell id="9e4kkIDtSIb9kZRDZaxI-13" parent="1" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;glass=0;dashed=1;dashPattern=8 8;strokeColor=light-dark(#000000,#66B2FF);" value="" vertex="1">
           <mxGeometry height="140" width="140" x="210" y="165" as="geometry" />
         </mxCell>
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-16" edge="1" parent="1" source="9e4kkIDtSIb9kZRDZaxI-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="9e4kkIDtSIb9kZRDZaxI-6">
@@ -75,11 +78,8 @@
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-28" edge="1" parent="1" style="html=1;labelBackgroundColor=#ffffff;startArrow=none;startFill=0;startSize=6;endArrow=classic;endFill=1;endSize=6;jettySize=auto;orthogonalLoop=1;strokeWidth=2;dashed=1;fontSize=14;rounded=0;" value="">
           <mxGeometry height="60" relative="1" width="60" as="geometry">
             <mxPoint x="135" y="470" as="sourcePoint" />
-            <mxPoint x="134.5" y="380" as="targetPoint" />
+            <mxPoint x="135" y="400" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="9e4kkIDtSIb9kZRDZaxI-33" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=1 4;fillColor=none;strokeColor=light-dark(#B46504,#FFFF66);" value="" vertex="1">
-          <mxGeometry height="380" width="570" x="190" y="60" as="geometry" />
         </mxCell>
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-30" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;rounded=0;strokeWidth=2;" target="9e4kkIDtSIb9kZRDZaxI-9" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
@@ -98,6 +98,9 @@
         </mxCell>
         <mxCell id="9e4kkIDtSIb9kZRDZaxI-10" parent="1" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=#ffffff;fillColor=#232F3E;dashed=0;verticalLabelPosition=middle;verticalAlign=bottom;align=center;html=1;whiteSpace=wrap;fontSize=10;fontStyle=1;spacing=3;shape=mxgraph.aws4.productIcon;prIcon=mxgraph.aws4.api_gateway;" value="Amazon API Gateway" vertex="1">
           <mxGeometry height="85" width="45" x="210" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="9e4kkIDtSIb9kZRDZaxI-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FFFF33);" value="VPC" vertex="1">
+          <mxGeometry height="30" width="60" x="700" y="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
