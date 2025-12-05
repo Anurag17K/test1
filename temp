@@ -1,41 +1,16 @@
-# Use official Python slim image
-FROM python:3.11-slim
+#!/bin/bash
+set -e
 
-# Environment variables
-ENV PYTHONUNBUFFERED=1 \
-    DJANGO_SETTINGS_MODULE=lostfound.settings \
-    PORT=8000 \
-    DEBIAN_FRONTEND=noninteractive
+echo "Running Django migrations..."
+python manage.py migrate --noinput
 
-WORKDIR /app
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        apt-utils \
-        build-essential \
-        libpq-dev \
-        bash \
-        dos2unix \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first for faster caching
-COPY requirements.txt .
-
-# Install Python packages
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the project
-COPY . .
-
-# Ensure entrypoint is executable and in Unix format
-RUN dos2unix /app/entrypoint.sh && chmod +x /app/entrypoint.sh
-
-# Create directories for static and media
-RUN mkdir -p /vol/static /vol/media
-
-# Expose port (optional, EB will provide $PORT)
-EXPOSE 8000
-
-# Set entrypoint
-CMD ["/app/entrypoint.sh"]
+echo "Starting Gunicorn on port $PORT..."
+exec gunicorn lostfound.wsgi:application \
+    --bind 0.0.0.0:${PORT:-8000} \
+    --workers 3 \
+    --log-level info \
+    --access-logfile '-' \
+    --error-logfile '-'
