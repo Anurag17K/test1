@@ -1,17 +1,23 @@
-# Use an official Python runtime as a parent image
+# Use official Python image
 FROM python:3.8-slim
 
-# Set the working directory in the container
+# Set work directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app/
+# Install system dependencies
+RUN apt-get update && apt-get install -y build-essential
 
-# Install any needed packages specified in requirements.txt
+# Copy requirements
+COPY requirements.txt /app/
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port the app runs on
+# Copy project
+COPY . /app/
+
+# Expose port 8000 for Elastic Beanstalk
 EXPOSE 8000
 
-# Run Django's development server (adjust for production later)
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run Gunicorn (production WSGI server)
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "lostfound.wsgi:application"]
