@@ -16,8 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Expose port 8000 for Elastic Beanstalk
-EXPOSE 8000
+# Expose port 8080 for Elastic Beanstalk
+EXPOSE 8080
 
 # Run Gunicorn (production WSGI server)
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "lostfound.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "lostfound.wsgi:application"]
