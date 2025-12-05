@@ -1,16 +1,17 @@
-#!/bin/bash
-set -e
+# Use an official Python runtime as a parent image
+FROM python:3.8-slim
 
-echo "Running Django migrations..."
-python manage.py migrate --noinput
+# Set the working directory in the container
+WORKDIR /app
 
-echo "Collecting static files..."
-python manage.py collectstatic --noinput
+# Copy the current directory contents into the container at /app
+COPY . /app/
 
-echo "Starting Gunicorn on port $PORT..."
-exec gunicorn lostfound.wsgi:application \
-    --bind 0.0.0.0:${PORT:-8000} \
-    --workers 3 \
-    --log-level info \
-    --access-logfile '-' \
-    --error-logfile '-'
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose the port the app runs on
+EXPOSE 8000
+
+# Run Django's development server (adjust for production later)
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
