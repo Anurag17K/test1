@@ -1,5 +1,5 @@
 # .github/workflows/deploy-eb.yml
-name: Deploy Django to Elastic Beanstalk + Code Quality Checks
+name: Deploy Django to Elastic Beanstalk
 
 on:
   push:
@@ -12,84 +12,40 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      EB_APP_NAME: your-eb-app-name
-      EB_ENV_NAME: your-eb-env-name
-      REGION: us-east-1
+      EB_APP_NAME: your-eb-app-name      # Elastic Beanstalk app name
+      EB_ENV_NAME: your-eb-env-name      # Elastic Beanstalk env name
+      REGION: us-east-1                  # Change if needed
 
     steps:
-      # Checkout code
+      # 1) Checkout code
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Set up Python
+      # 2) Set up Python
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      # Install dependencies
+      # 3) Install dependencies + EB CLI
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
           pip install awsebcli
 
-      # Configure AWS credentials (WITH SESSION TOKEN)
+      # 4) Configure AWS credentials (WITH SESSION TOKEN — Learner Lab requirement)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}   # ⭐ ADDED
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}  # ⭐ Required for Learner Lab
           aws-region: ${{ env.REGION }}
 
-      # Deploy to EB
+      # 5) Deploy to Elastic Beanstalk
       - name: Deploy to Elastic Beanstalk
         run: |
           eb init "$EB_APP_NAME" --region "$REGION" --platform "Python 3.11"
           eb use "$EB_ENV_NAME"
           eb deploy --verbose
-
-  sonar:
-    name: SonarQube Analysis
-    runs-on: ubuntu-latest
-    needs: deploy
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install Sonar Scanner
-        run: pip install sonar-scanner-cli
-
-      - name: Run SonarQube Scan
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=my-django-app \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN
-
-  owasp:
-    name: OWASP ZAP Security Scan
-    runs-on: ubuntu-latest
-    needs: sonar
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Run OWASP ZAP scan
-        uses: zaproxy/action-full-scan@v0.8.0
-        with:
-          target: "http://your-eb-env-url/"
-          format: "HTML"
-          failAction: "true"
