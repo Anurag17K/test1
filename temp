@@ -3,22 +3,22 @@ pipeline {
 
     environment {
         // EB app and environment names
-        EB_APP_NAME = "my-django-app"       // Replace with your EB app name
-        EB_ENV_NAME = "my-env"              // Replace with your EB environment name
-        REGION = "us-east-1"                // Replace with your region
+        EB_APP_NAME = "lostandfound-docker"
+        EB_ENV_NAME = "lostandfound-docker-env"
+        REGION = "us-east-1"
     }
 
-    stage('Checkout') {
+    stages {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'ff2fc462-fb36-4346-ae2b-684936782194',
-                    url: 'https://github.com/Anurag17K/ak-cdso-travelplanner-01.git'
+                    credentialsId: '690e0660-343f-4380-a709-779361de797a',
+                    url: 'https://github.com/x24199991/lostfound-devops.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                // Install Python dependencies
                 sh 'pip install --upgrade pip'
                 sh 'pip install -r requirements.txt'
             }
@@ -26,14 +26,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Optional: run Django tests
                 sh 'pytest'  // Or 'python manage.py test' if you prefer
             }
         }
 
         stage('Deploy to Elastic Beanstalk') {
             steps {
-                // Initialize EB (only first time needed, but safe to run every time)
+                // Initialize EB (first time only, safe to run every time)
                 sh "eb init ${EB_APP_NAME} --platform docker --region ${REGION} --quiet"
 
                 // Deploy to EB environment
