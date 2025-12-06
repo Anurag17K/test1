@@ -8,11 +8,11 @@ pipeline {
         REGION = "us-east-1"                // Replace with your region
     }
 
-    stages {
-        stage('Checkout') {
+    stage('Checkout') {
             steps {
-                // Pull latest code from GitHub
-                git branch: 'main', url: 'https://github.com/yourusername/your-django-repo.git'
+                git branch: 'main',
+                    credentialsId: 'ff2fc462-fb36-4346-ae2b-684936782194',
+                    url: 'https://github.com/Anurag17K/ak-cdso-travelplanner-01.git'
             }
         }
 
