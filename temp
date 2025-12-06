@@ -1,52 +1,33 @@
-pipeline {
-    agent any
+# Use official Python slim image
+FROM python:3.8-slim
 
-    environment {
-        // EB app and environment names
-        EB_APP_NAME = "lostandfound-docker"
-        EB_ENV_NAME = "lostandfound-docker-env"
-        REGION = "us-east-1"
-    }
+# Set working directory
+WORKDIR /app
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    credentialsId: '690e0660-343f-4380-a709-779361de797a',
-                    url: 'https://github.com/x24199991/lostfound-devops.git'
-            }
-        }
+# Install system dependencies for mysqlclient
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        default-libmysqlclient-dev \
+        gcc \
+        pkg-config \
+        && rm -rf /var/lib/apt/lists/*
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
-            }
-        }
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt /app/
 
-        stage('Run Tests') {
-            steps {
-                sh 'pytest'  // Or 'python manage.py test' if you prefer
-            }
-        }
+# Upgrade pip and install Python dependencies
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-        stage('Deploy to Elastic Beanstalk') {
-            steps {
-                // Initialize EB (first time only, safe to run every time)
-                sh "eb init ${EB_APP_NAME} --platform docker --region ${REGION} --quiet"
+# Copy the project files
+COPY . /app/
 
-                // Deploy to EB environment
-                sh "eb deploy ${EB_ENV_NAME} --region ${REGION} --quiet"
-            }
-        }
-    }
+# Make entrypoint.sh executable
+RUN chmod +x /app/entrypoint.sh
 
-    post {
-        success {
-            echo "Deployment successful!"
-        }
-        failure {
-            echo "Deployment failed. Check the logs."
-        }
-    }
-}
+# Expose port for EB
+EXPOSE 8080
+
+# Use entrypoint.sh as entrypoint
+ENTRYPOINT ["./entrypoint.sh"]
