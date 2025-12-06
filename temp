@@ -1,123 +1,53 @@
-name: Cloud Recipe DevSecOps Pipeline
+pipeline {
+    agent any
 
-on:
-  push:
-    branches:
-      - main
+    environment {
+        // EB app and environment names
+        EB_APP_NAME = "my-django-app"       // Replace with your EB app name
+        EB_ENV_NAME = "my-env"              // Replace with your EB environment name
+        REGION = "us-east-1"                // Replace with your region
+    }
 
-env:
-  AWS_REGION: us-east-1
-  AWS_ACCOUNT_ID: 590183683907
-  EB_APP_NAME: Cloud-Recipe-Forum
-  EB_ENV_NAME: CloudRecipeForum-docker-env
-  ECR_REPOSITORY: cloudrecipeforum
-  ZIP_FILE: deploy.zip
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pull latest code from GitHub
+                git branch: 'main', url: 'https://github.com/yourusername/your-django-repo.git'
+            }
+        }
 
-jobs:
-  # --------------------------
-  # 1) Lint (flake8)
-  # --------------------------
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-      - run: pip install flake8
-      - run: flake8 . || true
+        stage('Install Dependencies') {
+            steps {
+                // Install Python dependencies
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
+            }
+        }
 
-  # --------------------------
-  # 2) Security scan (Bandit)
-  # --------------------------
-  security:
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-      - run: pip install bandit
-      - run: bandit -r . --exit-zero
+        stage('Run Tests') {
+            steps {
+                // Optional: run Django tests
+                sh 'pytest'  // Or 'python manage.py test' if you prefer
+            }
+        }
 
-  # --------------------------
-  # 3) Build Docker (no ECR push needed in LabRole)
-  # --------------------------
-  build_docker:
-    runs-on: ubuntu-latest
-    needs: security
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Docker image (CI check)
-        run: docker build -t cloudrecipeforum-ci .
+        stage('Deploy to Elastic Beanstalk') {
+            steps {
+                // Initialize EB (only first time needed, but safe to run every time)
+                sh "eb init ${EB_APP_NAME} --platform docker --region ${REGION} --quiet"
 
-  # --------------------------
-  # 4) Deploy to Elastic Beanstalk
-  # --------------------------
-  deploy_eb:
-    runs-on: ubuntu-latest
-    needs: build_docker
-    steps:
-      - uses: actions/checkout@v4
+                // Deploy to EB environment
+                sh "eb deploy ${EB_ENV_NAME} --region ${REGION} --quiet"
+            }
+        }
+    }
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Create Dockerrun.aws.json
-        run: |
-          cat > Dockerrun.aws.json <<EOF
-          {
-            "AWSEBDockerrunVersion": "1",
-            "Image": {
-              "Name": "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest",
-              "Update": "true"
-            },
-            "Ports": [{"ContainerPort": "8000"}]
-          }
-          EOF
-
-      - name: Zip application bundle
-        run: zip -r ${{ env.ZIP_FILE }} Dockerrun.aws.json
-
-      - name: Upload ZIP to EB S3 bucket
-        run: aws s3 cp ${{ env.ZIP_FILE }} s3://elasticbeanstalk-us-east-1-590183683907/${{ env.ZIP_FILE }}
-
-      - name: Create EB application version
-        run: |
-          VERSION=github-${{ github.run_number }}
-          aws elasticbeanstalk create-application-version \
-            --application-name ${{ env.EB_APP_NAME }} \
-            --version-label $VERSION \
-            --source-bundle S3Bucket=elasticbeanstalk-us-east-1-590183683907,S3Key=${{ env.ZIP_FILE }}
-
-      - name: Wait for application version to be processed
-        run: |
-          VERSION=github-${{ github.run_number }}
-          APP=${{ env.EB_APP_NAME }}
-          while true; do
-              STATUS=$(aws elasticbeanstalk describe-application-versions \
-                  --application-name $APP \
-                  --version-label $VERSION \
-                  --query 'ApplicationVersions[0].Status' \
-                  --output text)
-              echo "Current status: $STATUS"
-              if [ "$STATUS" == "PROCESSED" ]; then
-                  break
-              elif [ "$STATUS" == "FAILED" ]; then
-                  echo "Application version processing failed!"
-                  exit 1
-              fi
-              sleep 5
-          done
-
-      - name: Deploy EB environment
-        run: |
-          aws elasticbeanstalk update-environment \
-            --environment-name ${{ env.EB_ENV_NAME }} \
-            --version-label github-${{ github.run_number }}
+    post {
+        success {
+            echo "Deployment successful!"
+        }
+        failure {
+            echo "Deployment failed. Check the logs."
+        }
+    }
+}
