@@ -1,33 +1,20 @@
-# Use official Python slim image
-FROM python:3.8-slim
+#!/bin/bash
+set -e
 
-# Set working directory
-WORKDIR /app
+echo "Python version: $(python --version)"
+echo "Installed packages:"
+pip list
 
-# Install system dependencies for mysqlclient
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        default-libmysqlclient-dev \
-        gcc \
-        pkg-config \
-        && rm -rf /var/lib/apt/lists/*
+echo "Running Django migrations..."
+python manage.py migrate --noinput
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.txt /app/
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
 
-# Upgrade pip and install Python dependencies
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
-
-# Copy the project files
-COPY . /app/
-
-# Make entrypoint.sh executable
-RUN chmod +x /app/entrypoint.sh
-
-# Expose port for EB
-EXPOSE 8080
-
-# Use entrypoint.sh as entrypoint
-ENTRYPOINT ["./entrypoint.sh"]
+echo "Starting Gunicorn..."
+exec gunicorn lostfound.wsgi:application \
+    --bind 0.0.0.0:${PORT:-8080} \
+    --workers 3 \
+    --log-level info \
+    --access-logfile '-' \
+    --error-logfile '-'
