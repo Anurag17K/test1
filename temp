@@ -1,51 +1,38 @@
-# .github/workflows/deploy-eb.yml
-name: Deploy Django to Elastic Beanstalk
+# Use official Python slim image
+FROM python:3.8-slim
 
-on:
-  push:
-    branches:
-      - main
+# Set working directory
+WORKDIR /app
 
-jobs:
-  deploy:
-    name: Deploy to AWS Elastic Beanstalk
-    runs-on: ubuntu-latest
+# Install system dependencies for mysqlclient, curl, and unzip
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        default-libmysqlclient-dev \
+        gcc \
+        pkg-config \
+        curl \
+        unzip \
+&& rm -rf /var/lib/apt/lists/*
 
-    env:
-      EB_APP_NAME: your-eb-app-name      # Elastic Beanstalk app name
-      EB_ENV_NAME: your-eb-env-name      # Elastic Beanstalk env name
-      REGION: us-east-1                  # Change if needed
+# Install the Elastic Beanstalk CLI (EB CLI)
+RUN curl -sL https://github.com/aws/aws-elastic-beanstalk-cli-setup/raw/master/install.sh | bash
 
-    steps:
-      # 1) Checkout code
-      - name: Checkout repo
-        uses: actions/checkout@v3
+# Copy requirements first to leverage Docker cache
+COPY requirements.txt /app/
 
-      # 2) Set up Python
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+# Upgrade pip and install Python dependencies
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-      # 3) Install dependencies + EB CLI
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
-          pip install awsebcli
+# Copy the project files
+COPY . /app/
 
-      # 4) Configure AWS credentials (WITH SESSION TOKEN — Learner Lab requirement)
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}  # ⭐ Required for Learner Lab
-          aws-region: ${{ env.REGION }}
+# Make entrypoint.sh executable
+RUN chmod +x /app/entrypoint.sh
 
-      # 5) Deploy to Elastic Beanstalk
-      - name: Deploy to Elastic Beanstalk
-        run: |
-          eb init "$EB_APP_NAME" --region "$REGION" --platform "Python 3.11"
-          eb use "$EB_ENV_NAME"
-          eb deploy --verbose
+# Expose port for EB
+EXPOSE 8080
+
+# Use entrypoint.sh as entrypoint
+ENTRYPOINT ["./entrypoint.sh"]
