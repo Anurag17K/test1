@@ -39,7 +39,7 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.ebcli
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('.ebcli*)' }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/.ebcli/**') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-ebcli-
