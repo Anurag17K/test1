@@ -32,18 +32,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # Cache pip and EBCLI
-      - name: Cache pip and EBCLI
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.ebcli
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/.ebcli/**') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-ebcli-
-
       # Install dependencies
       - name: Install dependencies
         run: |
@@ -96,20 +84,6 @@ jobs:
           version_label: v-${{ github.run_number }}
           region: ${{ env.REGION }}
           deployment_package: application.zip
-
-      # Get EB environment CNAME
-      - name: Get EB environment CNAME
-        id: eb-info
-        run: |
-          CNAME=$(aws elasticbeanstalk describe-environments \
-            --application-name "$EB_APP_NAME" \
-            --environment-names "$EB_ENV_NAME" \
-            --query 'Environments[0].CNAME' --output text)
-          if [ -z "$CNAME" ] || [ "$CNAME" = "None" ]; then
-            echo "No CNAME returned from AWS for $EB_ENV_NAME"
-            exit 1
-          fi
-          echo "eb_cname=$CNAME" >> $GITHUB_OUTPUT
 
       # Run OWASP ZAP Baseline Scan
       - name: Run OWASP ZAP Baseline Scan
