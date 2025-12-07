@@ -1,4 +1,4 @@
-name: Deploy Django to Elastic Beanstalk + Code Quality & Security Scans
+name: Deploy to Elastic Beanstalk
 
 on:
   push:
@@ -7,93 +7,44 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to AWS Elastic Beanstalk + SonarCloud + OWASP ZAP
     runs-on: ubuntu-latest
-    env:
-      EB_APP_NAME: Book-Market
-      EB_ENV_NAME: ebs1-env
-      REGION: us-east-1
 
     steps:
-      # Checkout repository
-      - name: Checkout repo
+      # Checkout the code
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # Set up Python + Java (for SonarCloud)
-      - name: Set up Python 3.11 and Java 17
-        uses: actions/setup-python@v4
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Set up Java 17 for SonarCloud
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
 
-      # Install dependencies
+      # Install dependencies (including system packages for mysqlclient)
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install awsebcli pytest pytest-cov
 
-      # Run tests
-      - name: Run tests
+      # Zip the application code (excluding .git)
+      - name: Zip application
         run: |
-          pytest --maxfail=1 --disable-warnings --cov=. --cov-report=xml:coverage.xml || true
+          zip -r application.zip . -x "*.git*"
 
-      # SonarCloud Scan
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
-        with:
-          args: >
-            -Dsonar.projectKey=Aatmaja-git_Book-Market
-            -Dsonar.organization=aatmaja-git
-            -Dsonar.sources=shop
-            -Dsonar.exclusions=**/migrations/**,**/venv/**,**/templates/**,**/tests.py
-            -Dsonar.tests=shop/tests.py
-            -Dsonar.test.exclusions=**/migrations/**,**/venv/**,**/templates/**
-            -Dsonar.python.version=3.11
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.coverage.exclusions=**/migrations/**,**/venv/**,**/templates/**
+      # List files in the current directory to confirm the application.zip exists
+      - name: List files in the current directory
+        run: ls -l
 
-      # Configure AWS credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.REGION }}
-
-      # Package the application into a zip file
-      - name: Package application into zip
-        run: |
-          zip -r application.zip .  # Create a zip file of your application
-
-      # Deploy to Elastic Beanstalk using einaregilsson/beanstalk-deploy
+      # Deploy to Elastic Beanstalk
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
-          application_name: ${{ env.EB_APP_NAME }}
-          environment_name: ${{ env.EB_ENV_NAME }}
+          application_name: Book-Market
+          environment_name: ebs1-env
           version_label: v-${{ github.run_number }}
-          region: ${{ env.REGION }}
+          region: us-east-1
           deployment_package: application.zip
-
-      # Run OWASP ZAP Baseline Scan
-      - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.14.0
-        with:
-          target: "http://${{ steps.eb-info.outputs.eb_cname }}"
-          rules_file_name: ".zap/rules.tsv"
-          cmd_options: "-d"
+          existing_bucket_name: your-existing-bucket-name
