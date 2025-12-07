@@ -1,72 +1,11 @@
-name: Deploy to Elastic Beanstalk + SonarCloud Scan
+sonar.projectKey=Anurag17K_ak-cdso-travelplanner-01
+sonar.organization=anurag17k
+sonar.host.url=https://sonarcloud.io
+sonar.python.version=3.12
+sonar.sources=.
+sonar.inclusions=**/*.py,**/*.html
+sonar.exclusions=**/migrations/**,**/venv/**,**/antenv/**,**/static/**,**/*.log
+sonar.python.coverage.reportPaths=coverage.xml
 
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      # -----------------------------
-      # Checkout the code
-      # -----------------------------
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # -----------------------------
-      # Set up Python
-      # -----------------------------
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      # -----------------------------
-      # Install dependencies (including system packages for mysqlclient)
-      # -----------------------------
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      # -----------------------------
-      # Run SonarCloud Scan
-      # -----------------------------
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          sonar-token: ${{ secrets.SONAR_TOKEN }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # -----------------------------
-      # Zip the application code (excluding .git)
-      # -----------------------------
-      - name: Zip application
-        run: |
-          zip -r application.zip . -x "*.git*"
-
-      # -----------------------------
-      # List files in the current directory to confirm the application.zip exists
-      # -----------------------------
-      - name: List files in the current directory
-        run: ls -l
-
-      # -----------------------------
-      # Deploy to Elastic Beanstalk (No S3 bucket required)
-      # -----------------------------
-      - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v22
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
-          application_name: Book-Market
-          environment_name: ebs1-env
-          version_label: v-${{ github.run_number }}
-          region: us-east-1
-          deployment_package: application.zip
+# (Optional) Test result report (JUnit-style, if you have one)
+# sonar.python.xunit.reportPath=unit-test-results.xml
