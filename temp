@@ -1,11 +1,95 @@
-sonar.projectKey=Anurag17K_ak-cdso-travelplanner-01
-sonar.organization=anurag17k
-sonar.host.url=https://sonarcloud.io
-sonar.python.version=3.12
-sonar.sources=.
-sonar.inclusions=**/*.py,**/*.html
-sonar.exclusions=**/migrations/**,**/venv/**,**/antenv/**,**/static/**,**/*.log
-sonar.python.coverage.reportPaths=coverage.xml
+pipeline {
+    agent any
 
-# (Optional) Test result report (JUnit-style, if you have one)
-# sonar.python.xunit.reportPath=unit-test-results.xml
+    environment {
+        EB_APP_NAME = "lostandfound-docker"
+        EB_ENV_NAME = "lostandfound-docker-env"
+        REGION = "us-east-1"
+        IMAGE_TAG = "latest"
+    }
+
+    tools {
+        // Use the SonarScanner tool configured in Jenkins
+        sonar 'SonarScanner'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: '8b22a412-f349-45b5-adbe-585c4908ccff',
+                    url: 'https://github.com/x24199991/lostfound-devops.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t lostfound:${IMAGE_TAG} .'
+            }
+        }
+
+        stage('Run Tests & Reports') {
+            steps {
+                echo "Running Django tests with coverage and lint..."
+                sh '''
+                  docker run --rm -v "$PWD:/workspace" -w /workspace \
+                    lostfound:${IMAGE_TAG} pytest --maxfail=1 --disable-warnings -q \
+                    --cov=. --cov-report=xml:coverage.xml || true
+
+                  docker run --rm -v "$PWD:/workspace" -w /workspace \
+                    lostfound:${IMAGE_TAG} pylint . --output-format=parseable > pylint-report.txt || true
+                '''
+            }
+        }
+
+        stage('SonarCloud Analysis') {
+            steps {
+                withSonarQubeEnv('SonarCloud') {
+                    sh '''
+                      sonar-scanner \
+                        -Dsonar.projectKey=Anurag17K_ak-cdso-travelplanner-01 \
+                        -Dsonar.organization=anurag17k \
+                        -Dsonar.host.url=https://sonarcloud.io \
+                        -Dsonar.sources=. \
+                        -Dsonar.inclusions=**/*.py,**/*.html \
+                        -Dsonar.exclusions=**/migrations/**,**/venv/**,**/antenv/**,**/static/**,**/*.log \
+                        -Dsonar.python.coverage.reportPaths=coverage.xml \
+                        -Dsonar.python.pylint.reportPaths=pylint-report.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Quality Gate failed: ${qg.status}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Elastic Beanstalk') {
+            steps {
+                echo "Initializing Elastic Beanstalk..."
+                sh "/usr/local/bin/eb init ${EB_APP_NAME} --platform docker --region ${REGION} --quiet"
+
+                echo "Deploying to EB environment..."
+                sh "/usr/local/bin/eb deploy ${EB_ENV_NAME} --region ${REGION} --quiet"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment successful!"
+        }
+        failure {
+            echo "Deployment failed. Check logs for details."
+        }
+    }
+}
