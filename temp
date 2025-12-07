@@ -6,11 +6,7 @@ pipeline {
         EB_ENV_NAME = "lostandfound-docker-env"
         REGION = "us-east-1"
         IMAGE_TAG = "latest"
-    }
-
-    tools {
-        // Use the SonarScanner tool configured in Jenkins
-        sonar 'SonarScanner'
+        SONAR_TOKEN = credentials('sonarcloud_token')
     }
 
     stages {
@@ -44,18 +40,23 @@ pipeline {
 
         stage('SonarCloud Analysis') {
             steps {
-                withSonarQubeEnv('SonarCloud') {
-                    sh '''
-                      sonar-scanner \
-                        -Dsonar.projectKey=Anurag17K_ak-cdso-travelplanner-01 \
-                        -Dsonar.organization=anurag17k \
-                        -Dsonar.host.url=https://sonarcloud.io \
-                        -Dsonar.sources=. \
-                        -Dsonar.inclusions=**/*.py,**/*.html \
-                        -Dsonar.exclusions=**/migrations/**,**/venv/**,**/antenv/**,**/static/**,**/*.log \
-                        -Dsonar.python.coverage.reportPaths=coverage.xml \
-                        -Dsonar.python.pylint.reportPaths=pylint-report.txt
-                    '''
+                script {
+                    // Resolve SonarScanner installation path from Jenkins Global Tool Config
+                    def scannerHome = tool 'SonarQubeScanner'
+                    withSonarQubeEnv('SonarCloud') {
+                        sh """
+                          ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=x24199991_lostfound-devops \
+                            -Dsonar.organization=x24199991 \
+                            -Dsonar.host.url=https://sonarcloud.io \
+                            -Dsonar.login=${SONAR_TOKEN} \
+                            -Dsonar.sources=. \
+                            -Dsonar.inclusions=**/*.py,**/*.html \
+                            -Dsonar.exclusions=**/migrations/**,**/venv/**,**/antenv/**,**/static/**,**/*.log \
+                            -Dsonar.python.coverage.reportPaths=coverage.xml \
+                            -Dsonar.python.pylint.reportPaths=pylint-report.txt
+                        """
+                    }
                 }
             }
         }
