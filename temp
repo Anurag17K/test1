@@ -1,53 +1,120 @@
-pipeline {
-    agent any
- 
-    environment {
-        EB_APP_NAME = "lostandfound-docker"
-        EB_ENV_NAME = "lostandfound-docker-env"
-        REGION = "us-east-1"
-        IMAGE_TAG = "latest"
-    }
- 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    credentialsId: '690e0660-343f-4380-a709-779361de797a',
-                    url: 'https://github.com/x24199991/lostfound-devops.git'
-            }
-        }
- 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t lostfound:${IMAGE_TAG} .'
-            }
-        }
- 
-        stage('Run Tests') {
-            steps {
-                echo "Running Django tests inside Docker..."
-                sh 'docker run --rm lostfound:${IMAGE_TAG} pytest || true'
-                // Using `|| true` to avoid pipeline failure if optional tests fail
-            }
-        }
- 
-        stage('Deploy to Elastic Beanstalk') {
-            steps {
-                echo "Initializing Elastic Beanstalk..."
-                sh "docker run --rm lostfound:${IMAGE_TAG} eb init ${EB_APP_NAME} --platform docker --region ${REGION} --quiet"
- 
-                echo "Deploying to EB environment..."
-                sh "docker run --rm lostfound:${IMAGE_TAG} eb deploy ${EB_ENV_NAME} --region ${REGION} --quiet"
-            }
-        }
-    }
- 
-    post {
-        success {
-            echo "Deployment successful!"
-        }
-        failure {
-            echo "Deployment failed. Check logs for details."
-        }
-    }
-}
+name: Deploy Django to Elastic Beanstalk + Code Quality & Security Scans
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to AWS Elastic Beanstalk + SonarCloud + OWASP ZAP
+    runs-on: ubuntu-latest
+    env:
+      EB_APP_NAME: Book-Market
+      EB_ENV_NAME: ebs1-env
+      REGION: us-east-1
+
+    steps:
+      # Checkout repository
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Set up Python + Java (for SonarCloud)
+      - name: Set up Python 3.11 and Java 17
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Set up Java 17 for SonarCloud
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Cache pip and EBCLI
+      - name: Cache pip and EBCLI
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.ebcli
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('.ebcli*)' }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-ebcli-
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install awsebcli pytest pytest-cov
+
+      # Run tests
+      - name: Run tests
+        run: |
+          pytest --maxfail=1 --disable-warnings --cov=. --cov-report=xml:coverage.xml || true
+
+      # SonarCloud Scan
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+        with:
+          args: >
+            -Dsonar.projectKey=Aatmaja-git_Book-Market
+            -Dsonar.organization=aatmaja-git
+            -Dsonar.sources=shop
+            -Dsonar.exclusions=**/migrations/**,**/venv/**,**/templates/**,**/tests.py
+            -Dsonar.tests=shop/tests.py
+            -Dsonar.test.exclusions=**/migrations/**,**/venv/**,**/templates/**
+            -Dsonar.python.version=3.11
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.coverage.exclusions=**/migrations/**,**/venv/**,**/templates/**
+
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.REGION }}
+
+      # Deploy to Elastic Beanstalk using einaregilsson/beanstalk-deploy
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
+          application_name: ${{ env.EB_APP_NAME }}
+          environment_name: ${{ env.EB_ENV_NAME }}
+          version_label: v-${{ github.run_number }}
+          region: ${{ env.REGION }}
+          deployment_package: application.zip
+
+      # Get EB environment CNAME
+      - name: Get EB environment CNAME
+        id: eb-info
+        run: |
+          CNAME=$(aws elasticbeanstalk describe-environments \
+            --application-name "$EB_APP_NAME" \
+            --environment-names "$EB_ENV_NAME" \
+            --query 'Environments[0].CNAME' --output text)
+          if [ -z "$CNAME" ] || [ "$CNAME" = "None" ]; then
+            echo "No CNAME returned from AWS for $EB_ENV_NAME"
+            exit 1
+          fi
+          echo "eb_cname=$CNAME" >> $GITHUB_OUTPUT
+
+      # Run OWASP ZAP Baseline Scan
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: "http://${{ steps.eb-info.outputs.eb_cname }}"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-d"
