@@ -1,4 +1,4 @@
-name: Deploy to Elastic Beanstalk
+name: Deploy to Elastic Beanstalk + SonarCloud Scan
 
 on:
   push:
@@ -10,32 +10,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # -----------------------------
       # Checkout the code
+      # -----------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # -----------------------------
       # Set up Python
+      # -----------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # -----------------------------
       # Install dependencies (including system packages for mysqlclient)
+      # -----------------------------
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # -----------------------------
+      # Run SonarCloud Scan
+      # -----------------------------
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # -----------------------------
       # Zip the application code (excluding .git)
+      # -----------------------------
       - name: Zip application
         run: |
           zip -r application.zip . -x "*.git*"
 
+      # -----------------------------
       # List files in the current directory to confirm the application.zip exists
+      # -----------------------------
       - name: List files in the current directory
         run: ls -l
 
-      # Deploy to Elastic Beanstalk
+      # -----------------------------
+      # Deploy to Elastic Beanstalk (No S3 bucket required)
+      # -----------------------------
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
@@ -47,4 +70,3 @@ jobs:
           version_label: v-${{ github.run_number }}
           region: us-east-1
           deployment_package: application.zip
-          existing_bucket_name: your-existing-bucket-name
