@@ -72,6 +72,11 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.REGION }}
 
+      # Package the application into a zip file
+      - name: Package application into zip
+        run: |
+          zip -r application.zip .  # Create a zip file of your application
+
       # Deploy to Elastic Beanstalk using einaregilsson/beanstalk-deploy
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
