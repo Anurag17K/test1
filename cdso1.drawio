@@ -22,11 +22,10 @@
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-6" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://logos-world.net/wp-content/uploads/2023/12/Jenkins-Emblem.png;" value="" vertex="1">
           <mxGeometry height="53.41" width="94.8" x="470" y="170" as="geometry" />
         </mxCell>
-        <mxCell id="RS_Pln8itMJ-vrjAgdSh-24" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-8" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="RS_Pln8itMJ-vrjAgdSh-7" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://images.seeklogo.com/logo-png/42/1/sonarcloud-logo-png_seeklogo-428364.png;" value="" vertex="1">
-          <mxGeometry height="70" width="70" x="370" y="280" as="geometry" />
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-24" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-8" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="405" y="350" as="sourcePoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-25" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-9" value="">
           <mxGeometry relative="1" as="geometry" />
@@ -43,8 +42,10 @@
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-10" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/app_services/App_Services.svg;" value="" vertex="1">
           <mxGeometry height="58" width="58" x="376" y="570" as="geometry" />
         </mxCell>
-        <mxCell id="RS_Pln8itMJ-vrjAgdSh-18" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-7" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-18" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="405" y="280" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-16" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/icon-cache1/Construction_2-2277/construction-industry-building-30-661.svg" value="" vertex="1">
           <mxGeometry height="52" width="52" x="379" y="160" as="geometry" />
@@ -53,7 +54,7 @@
           <mxGeometry height="30" width="60" x="320" y="171" as="geometry" />
         </mxCell>
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="Static Code Analysis&lt;div&gt;&amp;amp; Vulnerabilities&lt;/div&gt;&lt;div&gt;scan&lt;/div&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="290" y="300" as="geometry" />
+          <mxGeometry height="30" width="60" x="280" y="300.01" as="geometry" />
         </mxCell>
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="AZ Login" vertex="1">
           <mxGeometry height="30" width="60" x="315" y="390" as="geometry" />
@@ -74,7 +75,10 @@
           <mxGeometry height="30" width="60" x="375" y="-100" as="geometry" />
         </mxCell>
         <mxCell id="hdBljJbOx4mhs2Hk6s-I-1" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://img.stackshare.io/service/21616/default_19807553c7e4923893b5515514a7ccf87c0b14c6.png;" value="" vertex="1">
-          <mxGeometry height="50" width="50" x="447.5" y="300" as="geometry" />
+          <mxGeometry height="50" width="50" x="462.4" y="295.14" as="geometry" />
+        </mxCell>
+        <mxCell id="hdBljJbOx4mhs2Hk6s-I-2" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://images.g2crowd.com/uploads/product/image/social_landscape/social_landscape_da5c11b1a297045d8cedd927eb097b6b/sonarqube-cloud-formerly-sonarcloud.png;imageBorder=light-dark(#000000,#000000);" value="" vertex="1">
+          <mxGeometry height="53.76" width="102.4" x="353.8" y="288.13" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
