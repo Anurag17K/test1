@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.2.1">
+  <diagram name="Page-1" id="7Iu0DKa-3FX7qQr2JHCH">
+    <mxGraphModel dx="1034" dy="1733" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-13" parent="1" style="whiteSpace=wrap;html=1;fillColor=none;strokeWidth=3;strokeColor=light-dark(#000000,#000000);" value="" vertex="1">
+          <mxGeometry height="580" width="280" x="265" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-23" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-2" parent="1" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.visual_studio_online;" value="" vertex="1">
+          <mxGeometry height="37.5" width="50" x="380" y="-30" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-22" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-17" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-5" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/icon-cache1/Miu_Black_Social-2261/github-1223.svg" value="" vertex="1">
+          <mxGeometry height="60" width="60" x="375" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-6" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://logos-world.net/wp-content/uploads/2023/12/Jenkins-Emblem.png;" value="" vertex="1">
+          <mxGeometry height="53.41" width="94.8" x="470" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-24" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-7" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://images.seeklogo.com/logo-png/42/1/sonarcloud-logo-png_seeklogo-428364.png;" value="" vertex="1">
+          <mxGeometry height="70" width="70" x="370" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-25" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-8" parent="1" style="verticalLabelPosition=bottom;html=1;verticalAlign=top;align=center;strokeColor=none;fillColor=#00BEF2;shape=mxgraph.azure.access_control;" value="" vertex="1">
+          <mxGeometry height="50" width="50" x="380" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-26" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-10" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-9" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/containers/Container_Registries.svg;" value="" vertex="1">
+          <mxGeometry height="44.85" width="50" x="380" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-10" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/app_services/App_Services.svg;" value="" vertex="1">
+          <mxGeometry height="58" width="58" x="376" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-18" edge="1" parent="1" source="RS_Pln8itMJ-vrjAgdSh-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="RS_Pln8itMJ-vrjAgdSh-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-16" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/icon-cache1/Construction_2-2277/construction-industry-building-30-661.svg" value="" vertex="1">
+          <mxGeometry height="52" width="52" x="379" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontColor=light-dark(#000000,#000000);" value="webhook" vertex="1">
+          <mxGeometry height="30" width="60" x="320" y="171" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="Static Code Analysis" vertex="1">
+          <mxGeometry height="30" width="60" x="310" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="AZ Login" vertex="1">
+          <mxGeometry height="30" width="60" x="315" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontColor=light-dark(#000000,#000000);" value="Azure Container Registry" vertex="1">
+          <mxGeometry height="30" width="60" x="315" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-30" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontColor=light-dark(#000000,#000000);" value="Azure Web App" vertex="1">
+          <mxGeometry height="40" width="75" x="367.5" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-31" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontColor=light-dark(#000000,#000000);" value="Code IDE" vertex="1">
+          <mxGeometry height="30" width="60" x="435" y="-20" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-32" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="Version control" vertex="1">
+          <mxGeometry height="30" width="60" x="442.5" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="." vertex="1">
+          <mxGeometry height="30" width="60" x="375" y="-100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
