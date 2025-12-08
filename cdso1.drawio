@@ -52,8 +52,8 @@
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontStyle=1;fontColor=light-dark(#000000,#000000);" value="webhook" vertex="1">
           <mxGeometry height="30" width="60" x="320" y="171" as="geometry" />
         </mxCell>
-        <mxCell id="RS_Pln8itMJ-vrjAgdSh-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="Static Code Analysis" vertex="1">
-          <mxGeometry height="30" width="60" x="310" y="300" as="geometry" />
+        <mxCell id="RS_Pln8itMJ-vrjAgdSh-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="Static Code Analysis&lt;div&gt;&amp;amp; Vulnerabilities&lt;/div&gt;&lt;div&gt;scan&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="290" y="300" as="geometry" />
         </mxCell>
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-28" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);fontStyle=1" value="AZ Login" vertex="1">
           <mxGeometry height="30" width="60" x="315" y="390" as="geometry" />
@@ -72,6 +72,9 @@
         </mxCell>
         <mxCell id="RS_Pln8itMJ-vrjAgdSh-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="." vertex="1">
           <mxGeometry height="30" width="60" x="375" y="-100" as="geometry" />
+        </mxCell>
+        <mxCell id="hdBljJbOx4mhs2Hk6s-I-1" parent="1" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=bottom;verticalAlign=top;image=https://img.stackshare.io/service/21616/default_19807553c7e4923893b5515514a7ccf87c0b14c6.png;" value="" vertex="1">
+          <mxGeometry height="50" width="50" x="447.5" y="300" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
