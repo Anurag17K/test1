@@ -1,0 +1,146 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'Java-21'
+    }
+
+    environment {
+        ACR_NAME         = 'acraktravelplanner01'
+        IMAGE_NAME       = 'django-app'
+        REGISTRY         = "${ACR_NAME}.azurecr.io"
+        WEB_APP_NAME     = 'ak-travelplanner-cdso-dcr-01'
+        RESOURCE_GROUP   = 'rg-ak-travelplanner-francecentral-dev-01'
+        DOCKER_IMAGE_TAG = "${GIT_COMMIT}" 
+        SONAR_TOKEN      = credentials('sonarcloud-token')
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'ff2fc462-fb36-4346-ae2b-684936782194',
+                    url: 'https://github.com/Anurag17K/ak-cdso-travelplanner-01.git'
+            }
+        }
+
+        stage('Check Java') {
+            steps {
+                sh 'java -version; echo $JAVA_HOME'
+            }
+        }
+
+        stage('SonarCloud Analysis') {
+            steps {
+                script {
+                    withSonarQubeEnv('SonarCloud') {
+                        sh '''
+                        java -version
+                        export PATH=$PATH:/opt/sonar-scanner/bin
+                        sonar-scanner \
+                            -Dsonar.projectKey=Anurag17K_ak-cdso-travelplanner-01 \
+                            -Dsonar.organization=anurag17k \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=https://sonarcloud.io \
+                            -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Post-Sonar Tasks (Parallel)') {
+            parallel {
+
+                stage('Quality Gate Check (Non-blocking)') {
+                    steps {
+                        echo "Starting Quality Gate check in background..."
+                        timeout(time: 10, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: false
+                        }
+                        echo "Quality Gate check completed (pipeline continued regardless)."
+                    }
+                }
+
+                stage('Build & Deploy') {
+                    stages {
+
+                        stage('Build Docker Image') {
+                            steps {
+                                sh '''
+                                docker --version
+                                docker build --no-cache -t $REGISTRY/$IMAGE_NAME:$DOCKER_IMAGE_TAG .
+                                '''
+                            }
+                        }
+
+                        stage('Trivy Image Scan') {
+                            steps {
+                                sh '''
+                                docker run --rm \
+                                    -v /var/run/docker.sock:/var/run/docker.sock \
+                                    aquasec/trivy:latest image \
+                                    --severity HIGH,CRITICAL --exit-code 1 $REGISTRY/$IMAGE_NAME:$DOCKER_IMAGE_TAG || true
+                                '''
+                            }
+                        }
+
+                        stage('Login to Azure with Managed Identity') {
+                            steps {
+                                sh '''
+                                az --version
+                                az login --identity
+                                '''
+                            }
+                        }
+
+                        stage('Login to ACR') {
+                            steps {
+                                sh '''
+                                az acr login --name $ACR_NAME
+                                '''
+                            }
+                        }
+
+                        stage('Push Docker Image to ACR') {
+                            steps {
+                                sh '''
+                                docker push $REGISTRY/$IMAGE_NAME:$DOCKER_IMAGE_TAG
+                                '''
+                            }
+                        }
+
+                        stage('Deploy to Azure Web App') {
+                            steps {
+                                sh '''
+                                az webapp config container set \
+                                    --name $WEB_APP_NAME \
+                                    --resource-group $RESOURCE_GROUP \
+                                    --docker-custom-image-name $REGISTRY/$IMAGE_NAME:$DOCKER_IMAGE_TAG \
+                                    --docker-registry-server-url https://$REGISTRY
+                                '''
+                            }
+                        }
+
+                        // Clean up Docker images after deployment
+                        stage('Clean Docker Resources') {
+                            steps {
+                                sh 'docker system prune -af'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment to Azure Web App successful!"
+        }
+        failure {
+            echo "Deployment failed."
+        }
+    }
+}
