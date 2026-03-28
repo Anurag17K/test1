@@ -7,3 +7,10 @@ aws rds create-db-instance `
   --master-user-password ADMINpassword `
   --publicly-accessible `
   --no-multi-az
+
+
+eb create travelogue-env-01 `
+  --instance_profile AllAccessEC2Role `
+  --keyname master-project-key `
+  --instance-types t3.micro `
+  --single
