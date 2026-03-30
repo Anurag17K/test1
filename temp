@@ -1,16 +1,49 @@
-aws rds create-db-instance `
-  --db-instance-identifier shared-master-db `
-  --db-instance-class db.t4g.micro `
-  --engine postgres `
-  --allocated-storage 20 `
-  --master-username adminuser `
-  --master-user-password ADMINpassword `
-  --publicly-accessible `
-  --no-multi-az
+name: Deploy Travelogue to AWS EB
 
+on:
+  push:
+    branches:
+      - main
 
-eb create travelogue-env-01 `
-  --instance_profile AllAccessEC2Role `
-  --keyname master-project-key `
-  --instance-types t3.micro `
-  --single
+jobs:
+  deploy:
+    name: Build, Scan, and Deploy
+    runs-on: ubuntu-latest
+    
+    # 1. NEW: Give the pipeline permission to create the ZAP Bug Ticket
+    permissions:
+      contents: read
+      issues: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # 2. NEW: Added ".scannerwork/*" to the exclusion list
+      - name: Create ZIP deployment package
+        run: |
+          zip -r deploy.zip . -x "venv/*" "*.git*" ".github*" "__pycache__/*" "*.pyc" "*.sqlite3" ".scannerwork/*"
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: travelogue
+          environment_name: travelogue-env-01
+          version_label: "travelogue-${{ github.sha }}"
+          region: us-east-1 
+          deployment_package: deploy.zip
