@@ -1,4 +1,4 @@
-name: Deploy Travelogue to AWS EB
+name: Deploy to AWS Elastic Beanstalk
 
 on:
   push:
@@ -7,43 +7,27 @@ on:
 
 jobs:
   deploy:
-    name: Build, Scan, and Deploy
     runs-on: ubuntu-latest
-    
-    # 1. NEW: Give the pipeline permission to create the ZAP Bug Ticket
-    permissions:
-      contents: read
-      issues: write
-      
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.12' 
 
-      # 2. NEW: Added ".scannerwork/*" to the exclusion list
-      - name: Create ZIP deployment package
-        run: |
-          zip -r deploy.zip . -x "venv/*" "*.git*" ".github*" "__pycache__/*" "*.pyc" "*.sqlite3" ".scannerwork/*"
+      - name: Install AWS Elastic Beanstalk CLI
+        run: pip install awsebcli
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       - name: Deploy to Elastic Beanstalk
-        uses: einaregilsson/beanstalk-deploy@v22
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: travelogue
-          environment_name: travelogue-env-01
-          version_label: "travelogue-${{ github.sha }}"
-          region: us-east-1 
-          deployment_package: deploy.zip
+        working-directory: ./cloud_backend
+        run: eb deploy fogandedge-env-01
