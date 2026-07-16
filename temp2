@@ -1,4 +1,4 @@
-name: Deploy Django to Elastic Beanstalk + Code Quality & Security Scans
+name: Hybrid Blockchain CI/CD
 
 on:
   push:
@@ -7,152 +7,55 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to AWS Elastic Beanstalk + SonarCloud + OWASP ZAP
     runs-on: ubuntu-latest
-    env:
-      EB_APP_NAME: Book-Market
-      EB_ENV_NAME: ebs1-env
-      REGION: us-east-1
+
+    defaults:
+      run:
+        working-directory: hybrid-blockchain-supply-chain/app
 
     steps:
-      # -----------------------------
-      # Checkout repository
-      # -----------------------------
-      - name: Checkout repo
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # -----------------------------
-      # Set up Python
-      # -----------------------------
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      # -----------------------------
-      # Set up Java 17 (for SonarCloud)
-      # -----------------------------
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      # -----------------------------
-      # Cache pip packages
-      # -----------------------------
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # -----------------------------
-      # Install dependencies + awsebcli
-      # -----------------------------
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
-          pip install awsebcli
-          pip install pytest pytest-cov
-
-      # -----------------------------
-      # Run tests (pytest + coverage)
-      # -----------------------------
-      - name: Run tests
-        run: |
-          pytest --maxfail=1 --disable-warnings --cov=. --cov-report=xml:coverage.xml || true
-
-      # -----------------------------
-      # SonarCloud Scan
-      # -----------------------------
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectKey: "Aatmaja-git_Book-Market"  # Replace with your actual SonarCloud project key
-          organization: "aatmaja-git"  # Replace with your actual SonarCloud organization key
-          args: >
-            -Dsonar.sources=shop
-            -Dsonar.exclusions=**/migrations/**,**/venv/**,**/templates/**,**/tests.py
-            -Dsonar.tests=shop/tests.py
-            -Dsonar.test.exclusions=**/migrations/**,**/venv/**,**/templates/**
-            -Dsonar.python.version=3.11
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.coverage.exclusions=**/migrations/**,**/venv/**,**/templates/**
-
-      # -----------------------------
-      # Configure AWS credentials
-      # -----------------------------
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.REGION }}
+          aws-region: us-east-1
 
-      # -----------------------------
-      # Deploy to Elastic Beanstalk
-      # -----------------------------
-      - name: Deploy to Elastic Beanstalk
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
         run: |
-          export PATH="$PATH:$(python -m site --user-base)/bin"
-          hash -r
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install awsebcli
 
-          # Ensure EB application exists
-          aws elasticbeanstalk describe-applications --application-names "$EB_APP_NAME" || \
-          aws elasticbeanstalk create-application --application-name "$EB_APP_NAME"
-
-          # Initialize EB CLI
-          eb init $EB_APP_NAME --region $REGION --platform "Python 3.11" --quiet
-
-          # Check if environment exists
-          ENV_EXISTS=$(aws elasticbeanstalk describe-environments \
-            --application-name "$EB_APP_NAME" \
-            --environment-names "$EB_ENV_NAME" \
-            --query 'Environments[0].EnvironmentName' \
-            --output text)
-
-          if [ -z "$ENV_EXISTS" ] || [ "$ENV_EXISTS" = "None" ]; then
-              echo "Environment $EB_ENV_NAME does not exist. Creating..."
-              eb create $EB_ENV_NAME --platform "Python 3.11" --region $REGION --quiet
+      - name: Run Verification Gate
+        run: |
+          PRODUCT_ID=P001
+          
+          # Note: Ensure this URL is complete in your actual file. It appears truncated in your paste.
+          RESPONSE=$(curl -s http://hybrid-blockchain-env.eba-vzahpwuk.us-east-1.elasticbeanstalk.com/api/verify-deployment/$PRODUCT_ID)
+          
+          echo "$RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q '"deployment_allowed":true'; then
+            echo "Verification PASSED"
           else
-              echo "Environment $EB_ENV_NAME already exists."
-          fi
-
-          # Deploy
-          eb deploy $EB_ENV_NAME --verbose
-
-      # -----------------------------
-      # Get EB environment CNAME
-      # -----------------------------
-      - name: Get EB environment CNAME
-        id: eb-info
-        run: |
-          CNAME=$(aws elasticbeanstalk describe-environments \
-            --application-name "$EB_APP_NAME" \
-            --environment-names "$EB_ENV_NAME" \
-            --query 'Environments[0].CNAME' --output text)
-          if [ -z "$CNAME" ] || [ "$CNAME" = "None" ]; then
-            echo "No CNAME returned from AWS for $EB_ENV_NAME"
+            echo "Verification FAILED"
             exit 1
           fi
-          echo "eb_cname=$CNAME" >> $GITHUB_OUTPUT
 
-      # -----------------------------
-      # Run OWASP ZAP Baseline Scan
-      # -----------------------------
-      - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.14.0
-        with:
-          target: "http://${{ steps.eb-info.outputs.eb_cname }}"
-          rules_file_name: ".zap/rules.tsv"
-          cmd_options: "-d"
+      - name: Check EB CLI
+        run: |
+          eb --version
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          eb deploy hybrid-blockchain-env
